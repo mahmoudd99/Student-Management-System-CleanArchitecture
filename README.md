@@ -36,6 +36,11 @@ MyApp.Tests
 3. Run migrations
 4. Run the API
 
+
+
+## Swagger Documentation
+
+![Swagger](swagger.png)
 ## Author
 Mahmoud Amer
 
