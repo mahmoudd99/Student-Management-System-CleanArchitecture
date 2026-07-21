@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Command;
+using MyApp.Application.Features.Students.Queries.GetAllStudents;
 using MyApp.Core.Entities;
-using static MyApp.Application.Command.CreateStudentCommandHandler;
+
 
 namespace MyApp.API.Controllers
 {
@@ -12,10 +13,11 @@ namespace MyApp.API.Controllers
     public class StudentController(IMediator mediat) : ControllerBase
     {
 
-        [HttpGet("GetAllStudents")]
-        public async Task<IActionResult> GetAllStudents()
+        [HttpGet]
+        public async Task<IActionResult> GetAllStudents([FromQuery] GetAllStudentsQuery query)
         {
-            var result = await mediat.Send(new GetAllStudentsQuery());
+            var result = await mediat.Send(query);
+
             return Ok(result);
         }
         [HttpPost("AddStudent")]

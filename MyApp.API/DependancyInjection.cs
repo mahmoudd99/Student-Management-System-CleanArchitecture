@@ -7,9 +7,9 @@ namespace MyApp.API
     public  static class DependancyInjection
     {
 
-        public static IServiceCollection AddApiDI(this IServiceCollection service)
+        public static IServiceCollection AddApiDI(this IServiceCollection service, IConfiguration configuration)
         {
-            service.AddInfrastructureDI().AddApplicationDI();
+            service.AddInfrastructureDI(configuration).AddApplicationDI();
             return service;
         }
     }

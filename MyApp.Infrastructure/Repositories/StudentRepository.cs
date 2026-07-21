@@ -2,60 +2,111 @@
 using MyApp.Application.Interfaces;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyApp.Infrastructure.Repositories
+using MyApp.Application.Common.Pagination;
+using Microsoft.EntityFrameworkCore;
+public class StudentRepository(ApplicationDbContext dbContext)
+    : IStudentRepository
 {
-    public class StudentRepository(ApplicationDbContext dbContext): IStudentRepository
+    public async Task<PagedResult<Student>> GetAllStudentsAsync(PaginationParams paginationParams)
     {
-        public async Task<IEnumerable<Student>> GetStudentAsync()
+        var query = dbContext.students.AsQueryable();
+        //search
+        if (!string.IsNullOrWhiteSpace(paginationParams.Search))
         {
-            return await dbContext.students.ToListAsync();
+            query = query.Where(s =>
+                s.FName.Contains(paginationParams.Search) ||
+                s.LName.Contains(paginationParams.Search));
+        }
+        // Filter
+
+
+        if (paginationParams.MinAge.HasValue)
+        {
+            query = query.Where(s => s.Id >= paginationParams.MinAge.Value);
         }
 
-        public async Task<Student> GetStudentByIdAsync(int id)
+        if (paginationParams.MaxAge.HasValue)
         {
-            return await dbContext.students.FirstOrDefaultAsync(X => X.Id == id);
-
+            query = query.Where(s => s.Id <= paginationParams.MaxAge.Value);
         }
 
-        public async Task<Student> AddStudentAsync(Student student)
+        //sorting
+        var totalCount = await query.CountAsync();
+        if (!string.IsNullOrWhiteSpace(paginationParams.SortBy))
         {
-            dbContext.students.Add(student);
-            await dbContext.SaveChangesAsync();
-            return student;
-
-        }
-
-        public async Task<Student> UpdateStudentAsync(int id, Student student)
-        {
-            var Data = await dbContext.students.FirstOrDefaultAsync(x => x.Id == id);
-
-            if (Data != null)
+            query = paginationParams.SortBy.ToLower() switch
             {
-                Data.FName = student.FName;
-                Data.LName = student.LName;
-                Data.Email = student.Email;
-                dbContext.students.Update(student);
-            }
+                "fname" => paginationParams.Descending
+                    ? query.OrderByDescending(s => s.FName)
+                    : query.OrderBy(s => s.FName),
 
-            return student;
+                "lname" => paginationParams.Descending
+                    ? query.OrderByDescending(s => s.LName)
+                    : query.OrderBy(s => s.LName),
 
+                "id" => paginationParams.Descending
+                    ? query.OrderByDescending(s => s.Id)
+                    : query.OrderBy(s => s.Id),
+
+                _ => query.OrderBy(s => s.Id)
+            };
         }
+       
 
 
 
-        public async Task<string> DeleteStudentAsync(int id)
+        //pagination
+        var students = await query
+            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+            .Take(paginationParams.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<Student>
         {
-            var data = await dbContext.students.FirstOrDefaultAsync(x=>x.Id == id);
-            dbContext.students.Remove(data);
-            return "student is delleted succeffuly!";
-        }
+            Items = students,
+            PageNumber = paginationParams.PageNumber,
+            PageSize = paginationParams.PageSize,
+            TotalCount = totalCount
+        };
+    }
+    public async Task<Student?> GetStudentByIdAsync(int id)
+    {
+        return await dbContext.students
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<Student> AddStudentAsync(Student student)
+    {
+        dbContext.students.Add(student);
+
+        await dbContext.SaveChangesAsync();
+
+        return student;
+    }
+
+    public async Task<Student> UpdateStudentAsync(Student student)
+    {
+        dbContext.students.Update(student);
+
+        await dbContext.SaveChangesAsync();
+
+        return student;
+    }
+
+    public async Task DeleteStudentAsync(int id)
+    {
+        var student = await dbContext.students.FindAsync(id);
+
+        if (student == null)
+            throw new Exception("Student not found");
+
+        dbContext.students.Remove(student);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    Task<string> IStudentRepository.DeleteStudentAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
 }
-       

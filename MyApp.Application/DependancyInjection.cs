@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Behaviors;
 using MyApp.Application.Interfaces;
+using MyApp.Application.Mappings;
+using MyApp.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +20,9 @@ namespace MyApp.Application
         {
            
             service.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependancyInjection).Assembly));
-
+            service.AddAutoMapper(typeof(StudentProfile));
+            service.AddValidatorsFromAssembly(typeof(DependancyInjection).Assembly);
+            service.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return service;
         }
