@@ -6,9 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace MyApp.Application.Features.Students.Queries.GetStudentById
 {
-  
-        public record GetStudentByIdQuery(int Id) : IRequest<StudentDto>;
-   
+    public record GetStudentByIdQuery(int Id) : IRequest<StudentDto>;
 }

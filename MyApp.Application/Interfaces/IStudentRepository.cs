@@ -14,6 +14,8 @@ namespace MyApp.Application.Interfaces
 
         Task<Student?> UpdateStudentAsync(Student student);
 
+
+
         Task<string> DeleteStudentAsync(int id);
     }
 }

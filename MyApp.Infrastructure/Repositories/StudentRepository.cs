@@ -69,10 +69,9 @@ public class StudentRepository(ApplicationDbContext dbContext)
             TotalCount = totalCount
         };
     }
-    public async Task<Student?> GetStudentByIdAsync(int id)
+    public async Task<Student> GetStudentByIdAsync(int id)
     {
-        return await dbContext.students
-            .FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.students.FindAsync(id);
     }
 
     public async Task<Student> AddStudentAsync(Student student)

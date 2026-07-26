@@ -28,16 +28,11 @@ namespace MyApp.Application.Features.Students.Queries.GetStudentById
             GetStudentByIdQuery request,
             CancellationToken cancellationToken)
         {
-            var student =
-                await _studentRepository.GetStudentByIdAsync(request.Id);
-
-            if (student == null)
-                throw new Exception("Student not found");
+            var student = await _studentRepository.GetStudentByIdAsync(request.Id);
 
             return _mapper.Map<StudentDto>(student);
         }
     }
-
 
 
 }
