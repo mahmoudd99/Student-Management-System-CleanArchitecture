@@ -41,6 +41,13 @@ MyApp.Tests
 ## Swagger Documentation
 
 ![Swagger](swagger.png)
+
+
+
+## Frontend Repository
+
+Angular Frontend:
+https://github.com/mahmoudd99/Student-Management-System-Frontend
 ## Author
 Mahmoud Amer
 
